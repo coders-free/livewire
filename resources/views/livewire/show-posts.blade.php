@@ -9,7 +9,7 @@
         <x-table>
 
             <div class="px-6 py-4 flex items-center">
-                
+
                 <div class="flex items-center">
                     <span>Mostrar</span>
 
@@ -23,10 +23,11 @@
                     <span>entradas</span>
                 </div>
 
-                <x-jet-input class="flex-1 mx-4" placeholder="Escriba que quiere buscar" type="text" wire:model="search" />
+                <x-jet-input class="flex-1 mx-4" placeholder="Escriba que quiere buscar" type="text"
+                    wire:model="search" />
                 @livewire('create-post')
             </div>
-            
+
             @if (count($posts))
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
@@ -106,11 +107,16 @@
                                         {{ $item->content }}
                                     </div>
                                 </td>
-                                <td class="px-6 py-4  ext-sm font-medium">
-                                   {{-- @livewire('edit-post',['post'=>$post],key($post->id)) --}}
-                                   <a class="btn btn-green" wire:click="edit({{$item}})">
+                                <td class="px-6 py-4  ext-sm font-medium flex">
+
+                                    <a class="btn btn-green" wire:click="edit({{ $item }})">
                                         <i class="fas fa-edit"></i>
                                     </a>
+
+                                    <a class="btn btn-red ml-2" wire:click="$emit('deletePost', {{ $item->id }})">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+
                                 </td>
                             </tr>
                         @endforeach
@@ -119,9 +125,9 @@
                 </table>
 
                 @if ($posts->hasPages())
-            
+
                     <div class="px-6 py-3">
-                        {{$posts->links()}}
+                        {{ $posts->links() }}
                     </div>
 
                 @endif
@@ -155,22 +161,22 @@
             @if ($image)
                 <img class="mb-4" src="{{ $image->temporaryUrl() }}" alt="">
             @else
-                <img src="{{Storage::url($post->image)}}" alt="">
+                <img src="{{ Storage::url($post->image) }}" alt="">
             @endif
 
             <div class="mb-4">
-                <x-jet-label value="Título del post"/>
-                <x-jet-input wire:model="post.title" type="text" class="w-full"/>
+                <x-jet-label value="Título del post" />
+                <x-jet-input wire:model="post.title" type="text" class="w-full" />
             </div>
 
             <div>
-                <x-jet-label value="Contenido del post"/>
+                <x-jet-label value="Contenido del post" />
                 <textarea wire:model="post.content" rows="6" class="form-control w-full"></textarea>
             </div>
 
             <div>
                 <input type="file" wire:model="image" id="{{ $identificador }}">
-                <x-jet-input-error for="image"/>
+                <x-jet-input-error for="image" />
             </div>
 
         </x-slot>
@@ -186,5 +192,36 @@
         </x-slot>
 
     </x-jet-dialog-modal>
+
+    @push('js')
+        <script src="sweetalert2.all.min.js"></script>
+
+        <script>
+            Livewire.on('deletePost', postId => {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+
+
+                        Livewire.emitTo('show-posts', 'delete', postId);
+
+                        Swal.fire(
+                            'Deleted!',
+                            'Your file has been deleted.',
+                            'success'
+                        )
+                    }
+                })
+            });
+
+        </script>
+    @endpush
 
 </div>
